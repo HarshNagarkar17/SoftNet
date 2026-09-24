@@ -329,6 +329,24 @@ function App() {
     requestAnimationFrame(() => urlRef.current?.focus());
   }, []);
 
+  const duplicateTab = useCallback((id: string) => {
+    setTabState((state) => {
+      const index = state.tabs.findIndex((item) => item.id === id);
+      const source = index >= 0 ? state.tabs[index] : undefined;
+      if (!source || source.kind !== "request") return state;
+      const title =
+        source.name ?? (source.savedId ? workspaceRef.current.nodes[source.savedId]?.name : undefined) ?? null;
+      const created = {
+        ...newTab(structuredClone(source.request)),
+        name: title ? `${title} copy` : null,
+      };
+      const next = [...state.tabs];
+      next.splice(index + 1, 0, created);
+      return { tabs: next, active: created.id };
+    });
+    requestAnimationFrame(() => urlRef.current?.focus());
+  }, []);
+
   const closeTabs = useCallback((ids: string[]) => {
     const closing = new Set(ids);
     for (const item of tabsRef.current) {
@@ -1005,6 +1023,7 @@ function App() {
           onSelect={(id) => setTabState((state) => ({ ...state, active: id }))}
           onClose={(id) => askClose([id])}
           onCloseTabs={askClose}
+          onDuplicate={duplicateTab}
           onNew={() => openTab()}
           onRename={(id, name) => {
             const current = tabsRef.current.find((item) => item.id === id);

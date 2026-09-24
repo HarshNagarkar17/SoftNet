@@ -20,11 +20,12 @@ type TabBarProps = {
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onCloseTabs: (ids: string[]) => void;
+  onDuplicate: (id: string) => void;
   onNew: () => void;
   onRename: (id: string, name: string) => void;
 };
 
-export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onNew, onRename }: TabBarProps) {
+export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplicate, onNew, onRename }: TabBarProps) {
   const activeRef = useRef<HTMLDivElement>(null);
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
@@ -38,6 +39,10 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onNew, on
   const menuIndex = menuTab ? tabs.findIndex((item) => item.id === menuTab.id) : -1;
   const menuItems: MenuItem[] = menuTab
     ? [
+        { label: "New request", onSelect: onNew },
+        ...(menuTab.kind === "request"
+          ? [{ label: "Duplicate", divided: true, onSelect: () => onDuplicate(menuTab.id) } satisfies MenuItem]
+          : []),
         { label: "Close", onSelect: () => onClose(menuTab.id) },
         {
           label: "Close others",
