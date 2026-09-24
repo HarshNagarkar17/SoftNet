@@ -1,5 +1,5 @@
 import { Check, Keyboard, Monitor, Moon, Palette, SlidersHorizontal, Sun, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Auth, KvRow } from "../lib/request";
 import type { Theme } from "../lib/storage";
 import { AuthEditor } from "./AuthEditor";
@@ -198,7 +198,30 @@ const SHORTCUTS: { keys: string[]; label: string }[] = [
   { keys: [modKey, "F"], label: "Find in the response" },
   { keys: [modKey, "W"], label: "Close the tab" },
   { keys: [modKey, ","], label: "Open settings" },
+  { keys: [modKey, "/"], label: "Show keyboard shortcuts" },
 ];
+
+function ShortcutList() {
+  return (
+    <ul className="overflow-hidden rounded-lg border border-line">
+      {SHORTCUTS.map((item, index) => (
+        <li key={item.label} className={cx("flex items-center justify-between gap-4 px-3 py-2.5", index > 0 && "border-t border-line")}>
+          <span className="text-[13px] text-fg">{item.label}</span>
+          <span className="flex shrink-0 items-center gap-1">
+            {item.keys.map((key) => (
+              <kbd
+                key={key}
+                className="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-line bg-raised px-1.5 font-sans text-[11px] text-muted"
+              >
+                {key}
+              </kbd>
+            ))}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const SECTIONS = [
   { id: "general", label: "General", icon: SlidersHorizontal },
@@ -206,26 +229,44 @@ const SECTIONS = [
   { id: "shortcuts", label: "Shortcuts", icon: Keyboard },
 ] as const;
 
-type SettingsSection = (typeof SECTIONS)[number]["id"];
+export type SettingsSection = (typeof SECTIONS)[number]["id"];
 
 export function SettingsDialog({
   theme,
   onTheme,
   autosave,
   onAutosave,
+  initialSection = "general",
   onClose,
 }: {
   theme: Theme;
   onTheme: (theme: Theme) => void;
   autosave: boolean;
   onAutosave: (autosave: boolean) => void;
+  initialSection?: SettingsSection;
   onClose: () => void;
 }) {
-  const [section, setSection] = useState<SettingsSection>("general");
+  const [section, setSection] = useState<SettingsSection>(initialSection);
   const current = SECTIONS.find((item) => item.id === section) ?? SECTIONS[0];
 
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/45 p-6">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/45 p-6"
+      onPointerDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div
         role="dialog"
         aria-modal="true"
@@ -325,20 +366,9 @@ export function SettingsDialog({
             {section === "shortcuts" ? (
               <section>
                 <h3 className="text-[13px] font-medium text-fg">Keyboard</h3>
-                <ul className="mt-3 overflow-hidden rounded-lg border border-line">
-                  {SHORTCUTS.map((item, index) => (
-                    <li key={item.label} className={cx("flex items-center justify-between gap-4 px-3 py-2.5", index > 0 && "border-t border-line")}>
-                      <span className="text-[13px] text-fg">{item.label}</span>
-                      <span className="flex shrink-0 items-center gap-1">
-                        {item.keys.map((key) => (
-                          <kbd key={key} className="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-line bg-raised px-1.5 font-sans text-[11px] text-muted">
-                            {key}
-                          </kbd>
-                        ))}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-3">
+                  <ShortcutList />
+                </div>
               </section>
             ) : null}
           </div>
