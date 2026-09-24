@@ -25,9 +25,20 @@ type TabBarProps = {
   onRename: (id: string, name: string) => void;
 };
 
-export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplicate, onNew, onRename }: TabBarProps) {
+export function TabBar({
+  tabs,
+  active,
+  onSelect,
+  onClose,
+  onCloseTabs,
+  onDuplicate,
+  onNew,
+  onRename,
+}: TabBarProps) {
   const activeRef = useRef<HTMLDivElement>(null);
-  const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(
+    null,
+  );
   const [renaming, setRenaming] = useState<string | null>(null);
   const skipRename = useRef(false);
 
@@ -36,25 +47,42 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplica
   }, [active]);
 
   const menuTab = menu ? tabs.find((item) => item.id === menu.id) : undefined;
-  const menuIndex = menuTab ? tabs.findIndex((item) => item.id === menuTab.id) : -1;
+  const menuIndex = menuTab
+    ? tabs.findIndex((item) => item.id === menuTab.id)
+    : -1;
   const menuItems: MenuItem[] = menuTab
     ? [
         { label: "New request", onSelect: onNew },
         ...(menuTab.kind === "request"
-          ? [{ label: "Duplicate", divided: true, onSelect: () => onDuplicate(menuTab.id) } satisfies MenuItem]
+          ? [
+              {
+                label: "Duplicate",
+                divided: true,
+                onSelect: () => onDuplicate(menuTab.id),
+              } satisfies MenuItem,
+            ]
           : []),
         { label: "Close", onSelect: () => onClose(menuTab.id) },
         {
           label: "Close others",
           disabled: tabs.length < 2,
-          onSelect: () => onCloseTabs(tabs.filter((item) => item.id !== menuTab.id).map((item) => item.id)),
+          onSelect: () =>
+            onCloseTabs(
+              tabs
+                .filter((item) => item.id !== menuTab.id)
+                .map((item) => item.id),
+            ),
         },
         {
           label: "Close to the right",
           disabled: menuIndex === tabs.length - 1,
-          onSelect: () => onCloseTabs(tabs.slice(menuIndex + 1).map((item) => item.id)),
+          onSelect: () =>
+            onCloseTabs(tabs.slice(menuIndex + 1).map((item) => item.id)),
         },
-        { label: "Close all", onSelect: () => onCloseTabs(tabs.map((item) => item.id)) },
+        {
+          label: "Close all",
+          onSelect: () => onCloseTabs(tabs.map((item) => item.id)),
+        },
       ]
     : [];
 
@@ -84,11 +112,15 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplica
               onContextMenu={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                onSelect(tab.id);
                 setMenu({ id: tab.id, x: event.clientX, y: event.clientY });
               }}
             >
-              {selected ? <span className="absolute inset-x-0 top-0 h-0.5 bg-accent" aria-hidden="true" /> : null}
+              {selected ? (
+                <span
+                  className="absolute inset-x-0 top-0 h-0.5 bg-accent"
+                  aria-hidden="true"
+                />
+              ) : null}
               <div
                 role="tab"
                 tabIndex={0}
@@ -112,13 +144,30 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplica
                 className="flex h-full min-w-0 flex-1 cursor-pointer items-center gap-1.5 pr-1 pl-2.5 text-left focus-visible:outline-none"
               >
                 {tab.kind === "collection" ? (
-                  <Layers size={13} className="shrink-0 text-muted" aria-hidden="true" />
+                  <Layers
+                    size={13}
+                    className="shrink-0 text-muted"
+                    aria-hidden="true"
+                  />
                 ) : tab.kind === "environment" ? (
-                  <Variable size={13} className="shrink-0 text-muted" aria-hidden="true" />
+                  <Variable
+                    size={13}
+                    className="shrink-0 text-muted"
+                    aria-hidden="true"
+                  />
                 ) : tab.kind === "settings" ? (
-                  <Settings size={13} className="shrink-0 text-muted" aria-hidden="true" />
+                  <Settings
+                    size={13}
+                    className="shrink-0 text-muted"
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <span className={cx("shrink-0 font-mono text-[10px] font-semibold", methodText[tab.method])}>
+                  <span
+                    className={cx(
+                      "shrink-0 font-mono text-[10px] font-semibold",
+                      methodText[tab.method],
+                    )}
+                  >
                     {methodShort[tab.method]}
                   </span>
                 )}
@@ -150,10 +199,20 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplica
                     className="h-5 min-w-0 flex-1 rounded border border-ring bg-panel px-1 text-[12.5px] text-fg outline-none focus-visible:outline-none"
                   />
                 ) : (
-                  <span className={cx("truncate text-[12.5px]", selected ? "text-fg" : "text-muted")}>{tab.title}</span>
+                  <span
+                    className={cx(
+                      "truncate text-[12.5px]",
+                      selected ? "text-fg" : "text-muted",
+                    )}
+                  >
+                    {tab.title}
+                  </span>
                 )}
                 {tab.sending ? (
-                  <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent" aria-label="Sending" />
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent"
+                    aria-label="Sending"
+                  />
                 ) : null}
               </div>
               {tab.dirty ? (
@@ -168,7 +227,9 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplica
                 onClick={() => onClose(tab.id)}
                 className={cx(
                   "mr-1 h-5 w-5",
-                  selected && !tab.dirty ? "visible" : "invisible group-hover:visible focus-visible:visible",
+                  selected && !tab.dirty
+                    ? "visible"
+                    : "invisible group-hover:visible focus-visible:visible",
                 )}
               >
                 <X size={12} aria-hidden="true" />
@@ -178,11 +239,22 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onDuplica
         })}
       </div>
       <div className="flex items-center px-1">
-        <IconButton size="sm" label={`New request (${modKey}T)`} onClick={onNew}>
+        <IconButton
+          size="sm"
+          label={`New request (${modKey}T)`}
+          onClick={onNew}
+        >
           <Plus size={14} aria-hidden="true" />
         </IconButton>
       </div>
-      {menu && menuTab ? <Menu x={menu.x} y={menu.y} items={menuItems} onClose={() => setMenu(null)} /> : null}
+      {menu && menuTab ? (
+        <Menu
+          x={menu.x}
+          y={menu.y}
+          items={menuItems}
+          onClose={() => setMenu(null)}
+        />
+      ) : null}
     </div>
   );
 }
