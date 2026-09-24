@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --color-app: var(--app);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-ring: var(--ring);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --color-m-get: var(--m-get);
+  --color-m-post: var(--m-post);
+  --color-m-put: var(--m-put);
+  --color-m-patch: var(--m-patch);
+  --color-m-delete: var(--m-delete);
+  --color-m-other: var(--m-other);
+
+  --color-s-ok: var(--s-ok);
+  --color-s-redirect: var(--s-redirect);
+  --color-s-client: var(--s-client);
+  --color-s-server: var(--s-server);
+
+  --color-j-key: var(--j-key);
+  --color-j-string: var(--j-string);
+  --color-j-number: var(--j-number);
+  --color-j-bool: var(--j-bool);
+  --color-j-null: var(--j-null);
+  --color-j-punct: var(--j-punct);
+}
+
+:root {
+  color-scheme: light;
+  --app: #f4f4f5;
+  --panel: #ffffff;
+  --raised: #f7f7f8;
+  --hover: #eeeef0;
+  --line: #e6e6e9;
+  --line-strong: #d1d1d6;
+  --fg: #18181b;
+  --muted: #5c5c66;
+  --faint: #83838d;
+  --accent: #3b5bdb;
+  --accent-hover: #2f4bc4;
+  --accent-soft: #e8edfc;
+  --ring: #3b5bdb;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+
+  --m-get: #0d7a4b;
+  --m-post: #b25209;
+  --m-put: #1d4ed8;
+  --m-patch: #6d28d9;
+  --m-delete: #b42318;
+  --m-other: #4b5565;
+
+  --s-ok: #0d7a4b;
+  --s-redirect: #1d4ed8;
+  --s-client: #b25209;
+  --s-server: #b42318;
+
+  --j-key: #7b3aa6;
+  --j-string: #0d7a4b;
+  --j-number: #b25209;
+  --j-bool: #1d4ed8;
+  --j-null: #7f8898;
+  --j-punct: #5a6372;
+}
+
+.dark {
+  color-scheme: dark;
+  /* GitHub dark: near-black canvas, bright foreground, visible borders. */
+  --app: #010409;
+  --panel: #0d1117;
+  --raised: #161b22;
+  --hover: #21262d;
+  --line: #30363d;
+  --line-strong: #484f58;
+  --fg: #f0f6fc;
+  --muted: #c9d1d9;
+  --faint: #9198a1;
+  --accent: #1f6feb;
+  --accent-hover: #388bfd;
+  --accent-soft: #1c3048;
+  --ring: #4493f8;
+  --danger: #ff7b72;
+  --danger-soft: #3d1418;
+
+  --m-get: #3fb950;
+  --m-post: #d29922;
+  --m-put: #58a6ff;
+  --m-patch: #d2a8ff;
+  --m-delete: #ff7b72;
+  --m-other: #c9d1d9;
+
+  --s-ok: #3fb950;
+  --s-redirect: #58a6ff;
+  --s-client: #d29922;
+  --s-server: #ff7b72;
+
+  --j-key: #7ee787;
+  --j-string: #a5d6ff;
+  --j-number: #79c0ff;
+  --j-bool: #ff7b72;
+  --j-null: #ff7b72;
+  --j-punct: #f0f6fc;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--app);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [data-selectable] {
+    user-select: text;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  mark {
+    background: color-mix(in srgb, #f5c542 45%, transparent);
+    color: inherit;
+    border-radius: 2px;
+  }
+
+  mark[data-current] {
+    background: #f5c542;
+    color: #171b22;
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.progress-sweep {
+  animation: sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-in {
+  animation: toast-in 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
