@@ -8,6 +8,7 @@ export type MenuItem = {
   danger?: boolean;
   disabled?: boolean;
   confirm?: string;
+  divided?: boolean;
   onSelect: () => void;
 };
 
@@ -30,7 +31,10 @@ export function Menu({ x, y, items, onClose }: MenuProps) {
     const rect = el.getBoundingClientRect();
     setPos({
       x: Math.min(x, window.innerWidth - rect.width - 8),
-      y: y + rect.height > window.innerHeight - 8 ? Math.max(8, y - rect.height) : y,
+      y:
+        y + rect.height > window.innerHeight - 8
+          ? Math.max(8, y - rect.height)
+          : y,
     });
     el.focus();
   }, [x, y]);
@@ -87,25 +91,41 @@ export function Menu({ x, y, items, onClose }: MenuProps) {
         const Icon = item.icon;
         const confirming = armed === index;
         return (
-          <button
+          <div
             key={item.label}
-            type="button"
-            role="menuitem"
-            tabIndex={-1}
-            disabled={item.disabled}
-            onPointerEnter={() => setActive(index)}
-            onClick={() => choose(index)}
-            className={cx(
-              "flex h-7 w-full items-center gap-2 rounded-md px-2 text-left text-[12.5px]",
-              item.disabled ? "cursor-not-allowed text-faint" : "cursor-pointer",
-              !item.disabled && (item.danger ? "text-danger" : "text-fg"),
-              !item.disabled && index === active && (confirming ? "bg-danger-soft" : "bg-hover"),
-              confirming && "bg-danger-soft",
-            )}
+            className={
+              item.divided ? "mb-1 border-b border-line pb-1" : undefined
+            }
           >
-            {Icon ? <Icon size={13} className={item.danger ? "" : "text-muted"} aria-hidden="true" /> : null}
-            {confirming ? item.confirm : item.label}
-          </button>
+            <button
+              type="button"
+              role="menuitem"
+              tabIndex={-1}
+              disabled={item.disabled}
+              onPointerEnter={() => setActive(index)}
+              onClick={() => choose(index)}
+              className={cx(
+                "flex h-7 w-full items-center gap-2 rounded-md px-2 text-left text-[12.5px]",
+                item.disabled
+                  ? "cursor-not-allowed text-faint"
+                  : "cursor-pointer",
+                !item.disabled && (item.danger ? "text-danger" : "text-fg"),
+                !item.disabled &&
+                  index === active &&
+                  (confirming ? "bg-danger-soft" : "bg-hover"),
+                confirming && "bg-danger-soft",
+              )}
+            >
+              {Icon ? (
+                <Icon
+                  size={13}
+                  className={item.danger ? "" : "text-muted"}
+                  aria-hidden="true"
+                />
+              ) : null}
+              {confirming ? item.confirm : item.label}
+            </button>
+          </div>
         );
       })}
     </div>
