@@ -20,14 +20,25 @@ type TabBarProps = {
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onCloseTabs: (ids: string[]) => void;
+  onDuplicate: (id: string) => void;
   onNew: () => void;
   onRename: (id: string, name: string) => void;
 };
 
-export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onNew, onRename }: TabBarProps) {
-  const listRef = useRef<HTMLDivElement>(null);
+export function TabBar({
+  tabs,
+  active,
+  onSelect,
+  onClose,
+  onCloseTabs,
+  onDuplicate,
+  onNew,
+  onRename,
+}: TabBarProps) {
   const activeRef = useRef<HTMLDivElement>(null);
-  const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(
+    null,
+  );
   const [renaming, setRenaming] = useState<string | null>(null);
   const [overflowing, setOverflowing] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -72,21 +83,42 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onNew, on
   }, [active]);
 
   const menuTab = menu ? tabs.find((item) => item.id === menu.id) : undefined;
-  const menuIndex = menuTab ? tabs.findIndex((item) => item.id === menuTab.id) : -1;
+  const menuIndex = menuTab
+    ? tabs.findIndex((item) => item.id === menuTab.id)
+    : -1;
   const menuItems: MenuItem[] = menuTab
     ? [
+        { label: "New request", onSelect: onNew },
+        ...(menuTab.kind === "request"
+          ? [
+              {
+                label: "Duplicate",
+                divided: true,
+                onSelect: () => onDuplicate(menuTab.id),
+              } satisfies MenuItem,
+            ]
+          : []),
         { label: "Close", onSelect: () => onClose(menuTab.id) },
         {
           label: "Close others",
           disabled: tabs.length < 2,
-          onSelect: () => onCloseTabs(tabs.filter((item) => item.id !== menuTab.id).map((item) => item.id)),
+          onSelect: () =>
+            onCloseTabs(
+              tabs
+                .filter((item) => item.id !== menuTab.id)
+                .map((item) => item.id),
+            ),
         },
         {
           label: "Close to the right",
           disabled: menuIndex === tabs.length - 1,
-          onSelect: () => onCloseTabs(tabs.slice(menuIndex + 1).map((item) => item.id)),
+          onSelect: () =>
+            onCloseTabs(tabs.slice(menuIndex + 1).map((item) => item.id)),
         },
-        { label: "Close all", onSelect: () => onCloseTabs(tabs.map((item) => item.id)) },
+        {
+          label: "Close all",
+          onSelect: () => onCloseTabs(tabs.map((item) => item.id)),
+        },
       ]
     : [];
 
@@ -226,11 +258,22 @@ export function TabBar({ tabs, active, onSelect, onClose, onCloseTabs, onNew, on
         ) : null}
       </div>
       <div className="flex items-center px-1">
-        <IconButton size="sm" label={`New request (${modKey}T)`} onClick={onNew}>
+        <IconButton
+          size="sm"
+          label={`New request (${modKey}T)`}
+          onClick={onNew}
+        >
           <Plus size={14} aria-hidden="true" />
         </IconButton>
       </div>
-      {menu && menuTab ? <Menu x={menu.x} y={menu.y} items={menuItems} onClose={() => setMenu(null)} /> : null}
+      {menu && menuTab ? (
+        <Menu
+          x={menu.x}
+          y={menu.y}
+          items={menuItems}
+          onClose={() => setMenu(null)}
+        />
+      ) : null}
     </div>
   );
 }

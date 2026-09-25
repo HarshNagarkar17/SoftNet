@@ -4,7 +4,7 @@ import { AuthEditor } from "./components/AuthEditor";
 import { BodyEditor } from "./components/BodyEditor";
 import { CollectionTree, type TreeActions } from "./components/CollectionTree";
 import { ConfirmDialog, SaveDiscardDialog } from "./components/ConfirmDialog";
-import { CollectionPage, EmptyCanvas, EnvironmentPage, SettingsDialog } from "./components/ResourcePage";
+import { CollectionPage, EmptyCanvas, EnvironmentPage, SettingsDialog, type SettingsSection } from "./components/ResourcePage";
 import { EnvironmentPicker } from "./components/VariablesDialog";
 import { KeyValueEditor } from "./components/KeyValueEditor";
 import { ResponsePane, type SendState } from "./components/ResponsePane";
@@ -169,6 +169,7 @@ function App() {
   const [saving, setSaving] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ kind: "environment" | "collection"; id: string; name: string } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>("general");
   const quitWhenEmpty = useRef(false);
   const workspaceRef = useRef(workspace);
   workspaceRef.current = workspace;
@@ -326,6 +327,24 @@ function App() {
     setTabState((state) =>
       state.tabs.some((item) => item.id === created.id) ? { ...state, active: created.id } : { tabs: [...state.tabs, created], active: created.id },
     );
+    requestAnimationFrame(() => urlRef.current?.focus());
+  }, []);
+
+  const duplicateTab = useCallback((id: string) => {
+    setTabState((state) => {
+      const index = state.tabs.findIndex((item) => item.id === id);
+      const source = index >= 0 ? state.tabs[index] : undefined;
+      if (!source || source.kind !== "request") return state;
+      const title =
+        source.name ?? (source.savedId ? workspaceRef.current.nodes[source.savedId]?.name : undefined) ?? null;
+      const created = {
+        ...newTab(structuredClone(source.request)),
+        name: title ? `${title} copy` : null,
+      };
+      const next = [...state.tabs];
+      next.splice(index + 1, 0, created);
+      return { tabs: next, active: created.id };
+    });
     requestAnimationFrame(() => urlRef.current?.focus());
   }, []);
 
@@ -614,6 +633,11 @@ function App() {
         searchRef.current.select();
       } else if (key === ",") {
         event.preventDefault();
+        setSettingsSection("general");
+        setSettingsOpen(true);
+      } else if (key === "/") {
+        event.preventDefault();
+        setSettingsSection("shortcuts");
         setSettingsOpen(true);
       } else if (key === "w" && !event.shiftKey && !event.altKey && !event.repeat) {
         event.preventDefault();
@@ -690,7 +714,10 @@ function App() {
     [openTab, updateTab],
   );
 
-  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const openSettings = useCallback(() => {
+    setSettingsSection("general");
+    setSettingsOpen(true);
+  }, []);
 
   const deleteEnvironment = useCallback((id: string) => {
     setEnvironments((current) => ({
@@ -1005,6 +1032,7 @@ function App() {
           onSelect={(id) => setTabState((state) => ({ ...state, active: id }))}
           onClose={(id) => askClose([id])}
           onCloseTabs={askClose}
+          onDuplicate={duplicateTab}
           onNew={() => openTab()}
           onRename={(id, name) => {
             const current = tabsRef.current.find((item) => item.id === id);
@@ -1224,8 +1252,10 @@ function App() {
       ) : null}
       {settingsOpen ? (
         <SettingsDialog
+          key={settingsSection}
           theme={prefs.theme}
           autosave={prefs.autosave}
+          initialSection={settingsSection}
           onTheme={(theme) => setPrefs((value) => ({ ...value, theme }))}
           onAutosave={(autosave) => setPrefs((value) => ({ ...value, autosave }))}
           onClose={() => setSettingsOpen(false)}
